@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-l">Welcome</h1>
+            <ul>
+                <li><a href="/patient/9449305552">Test Patient (from FHIR server)</a></li>
+                <li><a href="/task/test">Test Task (not from server)</a></li>
+            </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+{% endblock %}

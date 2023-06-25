@@ -1,17 +1,25 @@
+from fhirtasker import app
+from fhirtasker.utils import generate_test_patient
+from fhirtasker.integrations.fhir.client import get_fhir_client, FHIRClientOperationError
+from fhirtasker.integrations.fhir.resources import ActivePatient
+
 import os
 
+from fhir.resources.R4B.bundle import Bundle
 from fhir.resources.R4B.patient import Patient
 from flask import render_template
 from markupsafe import escape
 import requests
 
-from fhirtasker import app
-from fhirtasker.utils import generate_test_patient
+FHIR_CLIENT = get_fhir_client()
 
-FHIR_BASE_URL = os.environ["FHIR_BASE_URL"]
-AUTH_BASE_URL = os.environ["AUTH_BASE_URL"]
-AUTH_CLIENT_ID = os.environ["AUTH_CLIENT_ID"]
-AUTH_CLIENT_SECRET = os.environ["AUTH_CLIENT_SECRET"]
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/task/test")
+def task_test():
+    return render_template("resources/task.html")
 
 @app.route("/patient/test")
 def patient_test():
@@ -19,30 +27,24 @@ def patient_test():
 
 @app.route("/patient/<unsafe_nhs_number>")
 def patient(unsafe_nhs_number):
-    nhs_number = escape(unsafe_nhs_number)
-    print("[INFO] Fetching OAuth Token")
-    oauth_token_request = requests.post(url = f"{AUTH_BASE_URL}/oauth2/token", 
-                                data = {
-                                    "grant_type": "client_credentials",
-                                    "resource": FHIR_BASE_URL,
-                                    "audience": FHIR_BASE_URL,
-                                    "client_id": AUTH_CLIENT_ID,
-                                    "client_secret": AUTH_CLIENT_SECRET
-                                },
-                                headers={
-                                    "content-type": "application/x-www-form-urlencoded"
-                                })
-    if oauth_token_request.status_code == 200:
-        token = oauth_token_request.json()['access_token']
-        patient_request = requests.get(url = f"{FHIR_BASE_URL}/Patient/{nhs_number}",
-                                       headers = {
-                                           "Authorization" : "Bearer " + token
-                                       })
-        if patient_request.status_code == 200:
-            patient_parsed = Patient.parse_raw(patient_request.content)
-            return render_template("resources/patient.html", patient=patient_parsed)
-        else:
-            return patient_request.json()
-    else:
-        return "Error!"
+    nhs_number = str(escape(unsafe_nhs_number))
+    try:    
+        active_patient = ActivePatient(nhs_number)
+        active_patient.refresh()
+
+        # if any active pathways exist
+        pathways_for_patient = FHIR_CLIENT.search("Task", 
+                                                  {"subject": f"Patient/{nhs_number}", 
+                                                   "status": "in-progress"})
+        pathways_parsed = None
+        if pathways_for_patient:
+            pathways_parsed = Bundle.parse_raw(pathways_for_patient)
+
+        return render_template("resources/patient.html", patient=active_patient.patient, pathways=pathways_parsed)     
+    except FHIRClientOperationError as ex:
+        if ex.status_code == 404:
+            return render_template("errors/404.html", error_text=f"The patient with NHS Number {nhs_number} could not be found.")
+        
+
+
     

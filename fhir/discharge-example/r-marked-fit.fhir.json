@@ -1,0 +1,26 @@
+{
+    "resourceType": "Observation",
+    "id": "D000-003-243R",
+    "status": "final",
+    "effectiveDateTime": "2019-06-14T14:01:00Z",
+    "code": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "428483004",
+                "display": "Medically fit for discharge"
+            }
+        ],
+        "text": "Marked medically fit for discharge"
+    },
+    "subject": {
+        "type": "Patient",
+        "reference": "Patient/9449305552",
+        "display": "CHISLETT, OCTAVIA"
+    },
+    "performer": [{
+        "type": "PractitionerRole",
+        "reference": "PractitionerRole/RHW00001",
+        "display": "HOUSE, ANDREW at Royal Berkshire NHS Foundation Trust (RHW)"
+    }]
+}

@@ -14,6 +14,7 @@
   <link rel="apple-touch-icon" sizes="152x152" href="/static/assets/images/govuk-apple-touch-icon-152x152.png">
   <link rel="apple-touch-icon" href="/static/assets/images/govuk-apple-touch-icon.png">
   <link href="/static/css/govuk-frontend-4.6.0.min.css" rel="stylesheet">
+  <link href="/static/css/moj-frontend.min.css" rel="stylesheet">
 </head>
 
 <body class="govuk-template__body ">
@@ -27,7 +28,6 @@
       <div class="govuk-header__logo">
         <a href="/" class="govuk-header__link govuk-header__link--homepage">
           <span class="govuk-header__logotype">
-            <!--[if gt IE 8]><!-->
             <span class="govuk-header__logotype-text">
               FHIR Tasker
             </span>
@@ -79,8 +79,14 @@
   </footer>
   {% endblock %}
   <script src="/static/js/govuk-frontend-4.6.0.min.js"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script src="/static/js/moj-frontend.min.js"></script>
   <script>
-    window.GOVUKFrontend.initAll()
+    window.GOVUKFrontend.initAll();
+    window.MOJFrontend.initAll();
   </script>
 </body>
 

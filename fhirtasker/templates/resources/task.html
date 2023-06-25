@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block header %}
+<header class="govuk-header " role="banner" data-module="govuk-header">
+    <div class="govuk-header__container govuk-width-container">
+      <div class="govuk-header__logo">
+        <a href="/" class="govuk-header__link govuk-header__link--homepage">
+          <span class="govuk-header__logotype">
+            <span class="govuk-header__logotype-text">
+              FHIR Tasker
+            </span>
+          </span>
+        </a>
+      </div>
+      <div class="govuk-header__content">
+        <a href="#" class="govuk-header__link govuk-header__service-name">
+            Berkshire West 
+          </a>
+      </div>
+    </div>
+    </div>
+  </header>
+{% endblock %}
+
+{% block main %}
+
+<span class="govuk-caption-xl">Pathway (D000-003-243)</span>
+<h1 class="govuk-heading-xl">Discharge of CHISLETT, OCTAVIA</h1>
+
+<h2 class="govuk-heading-l">Current Status</h2>
+<div class="moj-timeline__header">
+    <h2 class="moj-timeline__title"><strong class="govuk-tag govuk-tag--yellow">Received</strong><br/>Short-term referral</h2><br/>
+</div><br/>
+<p class="govuk-body">This request has been received by Helping Hands Reading (VNJ3K) but is awaiting a decision from a staff member.</p>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Requested by</th>
+        <td class="govuk-table__cell">TUCKER, MALCOLM at Reading Borough Council (616)</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Recipient</th>
+        <td class="govuk-table__cell">Helping Hands Reading (VNJ3K)</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Notes</th>
+        <td class="govuk-table__cell">Needs domiciliary care visits 3 x day for 4 weeks post-discharge</td>
+      </tr>
+    </tbody>
+  </table>
+<p class="govuk-body"><b>You may still amend or cancel this referral</b></p>
+<div class="moj-button-menu">
+  <div class="moj-button-menu__wrapper">
+    <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--secondary" data-module="govuk-button">
+      Amend referral
+    </a>
+
+    <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--warning" data-module="govuk-button">
+      Cancel referral
+    </a>
+  </div>
+</div>
+<br/>
+
+  
+<h2 class="govuk-heading-l">History</h2>
+<div class="moj-timeline">
+
+      <div class="moj-timeline__item">
+  
+        <div class="moj-timeline__header">
+          <h2 class="moj-timeline__title"><strong class="govuk-tag govuk-tag--green">Completed</strong><br/> Social care assessment and referral</h2><br/>
+        </div>
+        <p class="moj-timeline__date">
+          <time datetime="2019-06-14T14:01:00.000Z">14 June 2019 at 2:01pm</time>
+        </p>
+        <div class="moj-timeline__description">
+            <table class="govuk-table">
+                <tbody class="govuk-table__body">
+                  <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header">Requested by</th>
+                    <td class="govuk-table__cell">COVERLEY, TERRI at Royal Berkshire NHS Foundation Trust (RHW)</td>
+                  </tr>
+                  <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header">Completed by</th>
+                    <td class="govuk-table__cell">TUCKER, MALCOLM at Reading Borough Council (616)</td>
+                  </tr>
+                  <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header">Notes</th>
+                    <td class="govuk-table__cell"><i>No notes provided for this request</i></td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+      </div>
+
+    <div class="moj-timeline__item">
+  
+      <div class="moj-timeline__header">
+        <h2 class="moj-timeline__title">Marked medically fit for discharge</h2><br/>
+        <p class="moj-timeline__byline">by HOUSE, ANDREW at Royal Berkshire NHS Foundation Trust (RHW)</p>
+      </div>
+      <p class="moj-timeline__date">
+        <time datetime="2019-06-14T14:01:00.000Z">14 June 2019 at 2:01pm</time>
+      </p>
+    </div>
+  
+  </div>
+  
+{% endblock %}
