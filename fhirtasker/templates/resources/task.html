@@ -1,110 +1,145 @@
 {% extends "layout.html" %}
 
-{% block header %}
-<header class="govuk-header " role="banner" data-module="govuk-header">
-    <div class="govuk-header__container govuk-width-container">
-      <div class="govuk-header__logo">
-        <a href="/" class="govuk-header__link govuk-header__link--homepage">
-          <span class="govuk-header__logotype">
-            <span class="govuk-header__logotype-text">
-              FHIR Tasker
-            </span>
-          </span>
-        </a>
-      </div>
-      <div class="govuk-header__content">
-        <a href="#" class="govuk-header__link govuk-header__service-name">
-            Berkshire West 
-          </a>
-      </div>
-    </div>
-    </div>
-  </header>
-{% endblock %}
-
-{% block main %}
-
-<span class="govuk-caption-xl">Pathway (D000-003-243)</span>
-<h1 class="govuk-heading-xl">Discharge of CHISLETT, OCTAVIA</h1>
-
-<h2 class="govuk-heading-l">Current Status</h2>
-<div class="moj-timeline__header">
-    <h2 class="moj-timeline__title"><strong class="govuk-tag govuk-tag--yellow">Received</strong><br/>Short-term referral</h2><br/>
-</div><br/>
-<p class="govuk-body">This request has been received by Helping Hands Reading (VNJ3K) but is awaiting a decision from a staff member.</p>
-<table class="govuk-table">
+{% macro render_task(task, show_tag=True, show_title=True, show_date=False, show_notes=True, link_title=True) %}
+<div>
+{%if show_title%}<div class="moj-timeline__header">
+  <h2 class="moj-timeline__title">{%if show_tag%}<strong class="govuk-tag govuk-tag--{{task.status | status_to_govuk_tag_color }}">{{task.status | title}}</strong><br/>{%endif%}{%if link_title%}<a href="/Task/{{task.id}}">{%endif%}{{task.code.text}}{%if link_title %}</a>{%endif%}</h2><br/>
+  </div>{%endif%}
+  {%if show_date%}<p class="moj-timeline__date">
+    <time datetime="{{task.lastModified}}">{{task.lastModified | to_govuk_date }}</time>
+  </p>{%endif%}
+  <br/>
+  <table class="govuk-table">
     <tbody class="govuk-table__body">
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Requested by</th>
-        <td class="govuk-table__cell">TUCKER, MALCOLM at Reading Borough Council (616)</td>
+        <td class="govuk-table__cell">{{task.requester.display}}</td>
       </tr>
       <tr class="govuk-table__row">
-        <th scope="row" class="govuk-table__header">Recipient</th>
-        <td class="govuk-table__cell">Helping Hands Reading (VNJ3K)</td>
+        <th scope="row" class="govuk-table__header">{{task.status | status_to_verb }}</th>
+        <td class="govuk-table__cell">{{task.owner.display}}</td>
       </tr>
+      {% if show_notes %}
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Notes</th>
-        <td class="govuk-table__cell">Needs domiciliary care visits 3 x day for 4 weeks post-discharge</td>
+        <td class="govuk-table__cell">
+          {% if task.note %}
+          {{task.note[0].text}}
+          {% else %}
+          <i>No notes provided for this request</i>
+          {% endif %}
+        </td>
       </tr>
+      {% endif %}
     </tbody>
   </table>
-<p class="govuk-body"><b>You may still amend or cancel this referral</b></p>
-<div class="moj-button-menu">
-  <div class="moj-button-menu__wrapper">
-    <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--secondary" data-module="govuk-button">
-      Amend referral
-    </a>
+  {% if task.status == "received" %}
+    {% if (user.id | to_practitioner_role_reference ) == task.requester.reference %}
+      <p class="govuk-body">This subtask was started by you. <b>You may still amend or cancel it.</b></p>
+      <div class="moj-button-menu">
+        <div class="moj-button-menu__wrapper">
+          <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--secondary" data-module="govuk-button">
+            Amend subtask
+          </a>
 
-    <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--warning" data-module="govuk-button">
-      Cancel referral
-    </a>
-  </div>
+          <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--warning" data-module="govuk-button">
+            Cancel subtask
+          </a>
+        </div>
+      </div>
+    {% endif %}
+    {% if user.organization.identifier.value == task.owner.identifier.value %}
+    <p class="govuk-body">Your organization has received a request to carry out this task. <b>Would you like to accept or decline this task?</b></p>
+    <div class="moj-button-menu">
+      <div class="moj-button-menu__wrapper">
+        <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button" data-module="govuk-button">
+          Accept request
+        </a>
+
+        <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--warning" data-module="govuk-button">
+          Decline request
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
 </div>
+{% endmacro %}
+
+{% block hero %}
+<span class="govuk-caption-xl">{% if task.partOf %}Pathway task{%else%}Pathway{%endif%} ({{task.id}})</span>
+<h1 class="govuk-heading-xl"><strong class="govuk-tag govuk-tag--{{task.status | status_to_govuk_tag_color}}">{{task.status}}</strong><br/>{{task.code.text}} {%if task.for_fhir%}for {{task.for_fhir.display}}{%endif%}</h1>
+
+{% if task.note %}
+<p class="govuk-body-l">{{task.note[0].text}}</p>
+{% endif %}
+
+{% endblock %}
+
+
+{% block main %}
+<div>
+{% if task.owner %}
+{{render_task(task, show_tag=False, show_title=False, show_notes=False)}}
+{% endif %}
+
+{% if subtasks %}
+<code hidden>
+  <b>Task</b>
+  {{task.json()}}
+  <br/>
+  <b>Subtasks</b>
+  {% for subtask in subtasks %} 
+    {{subtask.json()}}
+    <br/>
+  {% endfor %}
+  <b>User</b>
+  {{user.json()}}
+</code>
+<h2 class="govuk-heading-l">Current Task</h2>
+  {{render_task(subtasks[0])}}
+<br/>
 <br/>
 
   
 <h2 class="govuk-heading-l">History</h2>
 <div class="moj-timeline">
-
-      <div class="moj-timeline__item">
-  
-        <div class="moj-timeline__header">
-          <h2 class="moj-timeline__title"><strong class="govuk-tag govuk-tag--green">Completed</strong><br/> Social care assessment and referral</h2><br/>
-        </div>
-        <p class="moj-timeline__date">
-          <time datetime="2019-06-14T14:01:00.000Z">14 June 2019 at 2:01pm</time>
-        </p>
-        <div class="moj-timeline__description">
-            <table class="govuk-table">
-                <tbody class="govuk-table__body">
-                  <tr class="govuk-table__row">
-                    <th scope="row" class="govuk-table__header">Requested by</th>
-                    <td class="govuk-table__cell">COVERLEY, TERRI at Royal Berkshire NHS Foundation Trust (RHW)</td>
-                  </tr>
-                  <tr class="govuk-table__row">
-                    <th scope="row" class="govuk-table__header">Completed by</th>
-                    <td class="govuk-table__cell">TUCKER, MALCOLM at Reading Borough Council (616)</td>
-                  </tr>
-                  <tr class="govuk-table__row">
-                    <th scope="row" class="govuk-table__header">Notes</th>
-                    <td class="govuk-table__cell"><i>No notes provided for this request</i></td>
-                  </tr>
-                </tbody>
-              </table>
-        </div>
-      </div>
-
+  {% if subtasks | length > 1 %}
+    {% for subtask in subtasks[1:] %}
     <div class="moj-timeline__item">
-  
+      {{render_task(subtask, show_date=True)}}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+    <!-- Last item is always a reason, if there is one -->
+    {% if reason %}
+    <div class="moj-timeline__item">
       <div class="moj-timeline__header">
-        <h2 class="moj-timeline__title">Marked medically fit for discharge</h2><br/>
-        <p class="moj-timeline__byline">by HOUSE, ANDREW at Royal Berkshire NHS Foundation Trust (RHW)</p>
+        <h2 class="moj-timeline__title">{{reason.code.text}}</h2><br/>
+        <p class="moj-timeline__byline">
+          {% if reason.performer %} 
+          by {{reason.performer[0].display}}
+          {% endif %}
+        </p>
       </div>
       <p class="moj-timeline__date">
-        <time datetime="2019-06-14T14:01:00.000Z">14 June 2019 at 2:01pm</time>
+        <time datetime="{{reason.effectiveDateTime}}">{{reason.effectiveDateTime | to_govuk_date}}</time>
       </p>
     </div>
+    {% endif %}
+
   
   </div>
-  
+{% endif %}
+</div>
+{% endblock %}
+
+{% block side %}
+
+<h4 class="govuk-heading-m">Linked</h4>
+<ul class="govuk-list">
+  {% if task.for_fhir %}<li>Patient on pathway: <a class="govuk-link" href="/{{task.for_fhir.reference}}">{{task.for_fhir.display}}</a></li>{% endif %}
+  {% if task.partOf[0] %}<li>Part of pathway: <a class="govuk-link" href="/{{task.partOf[0].reference}}">{{task.partOf[0].reference}}</a></li>{%endif%}
+</ul>
 {% endblock %}

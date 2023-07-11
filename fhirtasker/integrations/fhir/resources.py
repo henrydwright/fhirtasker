@@ -32,6 +32,7 @@ class ActivePatient(ActiveBase):
 
     def __init__(self, id: str):
         super().__init__(id, "Patient")
+        self.refresh()
 
     def refresh(self):
         """Replaces local copy of resource with one from server"""

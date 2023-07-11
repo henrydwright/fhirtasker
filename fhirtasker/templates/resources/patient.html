@@ -21,8 +21,10 @@
         {% if pathways %}
         {% for entry in pathways.entry %}
           {% if not entry.resource.partOf %}
-            <h3 class="govuk-heading-m"><strong class="govuk-tag govuk-tag--yellow">{{entry.resource.status}}</strong><br/>{{entry.resource.code.text}} ({{entry.resource.id}})</h3>
-            <p class="govuk-body">{{entry.resource.note.text}}</p>
+            <h3 class="govuk-heading-m"><strong class="govuk-tag govuk-tag--yellow">{{entry.resource.status | replace("-", " ")}}</strong><br/>{{entry.resource.code.text}} (<a href="/Task/{{entry.resource.id}}">{{entry.resource.id}}</a>)</h3>
+            {% if entry.resource.note %}
+              <p class="govuk-body">{{entry.resource.note[0].text}}</p>
+            {% endif %}
           {% endif %}
         {% endfor %}
         {% else %}
@@ -95,8 +97,6 @@
           </div>
       </div>
       <div class="govuk-grid-column-one-third">
-
-        
       </div>
     </div>
     </main>

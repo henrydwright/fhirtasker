@@ -21,7 +21,7 @@ class FHIRClientOperationError(Exception):
                  operation_outcome: Optional[OperationOutcome] = None):
         self.status_code = status_code
         self.operation_outcome = operation_outcome
-        super(msg)
+        super().__init__(msg)
 
 class FHIRClient():
     _settings = None
@@ -43,17 +43,27 @@ class FHIRClient():
                 outcome = OperationOutcome.parse_raw(response.content)
                 raise FHIRClientOperationError(str(outcome), response.status_code, outcome)
             except (Exception):
-                raise FHIRClientOperationError("Error occurred, content was:" + response.content, response.status_code)
+                raise FHIRClientOperationError("Error occurred, content was:" + str(response.content), response.status_code)
 
     def get_resource(self, relative_path : str) -> requests.Response:
         token = self._auth_client.get_token()
-        app.logger.info(f"Fetching resource at path: '{relative_path}'")
+        app.logger.info(f"FHIR Client - GET '{relative_path}'")
         response = requests.get(url=f"{self._settings.base_url}/{relative_path}", 
                             headers={
                                 "Authorization": f"Bearer {token}",
-                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
                                 "Accept": "*/*"
                             })
+        return response
+    
+    def put_resource(self, relative_path: str, new_content: object) -> requests.Response:
+        token = self._auth_client.get_token()
+        app.logger.info(f"FHIR Client - PUT '{relative_path}'")
+        response = requests.put(url=f"{self._settings.base_url}/{relative_path}",
+                                json=new_content,
+                                headers={
+                                    "Authorization": f"Bearer {token}",
+                                    "Accept": "*/*"
+                                })
         return response
     
     def get_resource_content(self, 
@@ -65,10 +75,13 @@ class FHIRClient():
     def search(self,
                resource_type: str,
                query_params: dict,
+               sort_rules: Optional[list[str]] = None,
                none_on_404: bool = True):
         search_params = []
         for k, v in query_params.items():
             search_params.append(k + "=" + v)
+        if sort_rules:
+            search_params.append("_sort=" + ",".join(sort_rules))
         search_string = "?" + "&".join(search_params)
         response = self.get_resource(resource_type + search_string)
         return self._handle_standard_response(response, none_on_404)
