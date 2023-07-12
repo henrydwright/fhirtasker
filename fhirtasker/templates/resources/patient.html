@@ -1,104 +1,96 @@
 {% extends "layout.html" %}
 
-{% block content %}
-<div class="govuk-width-container">
-  {% block backlink %}
-  {% endblock %}
-  <main class="govuk-main-wrapper">
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-two-thirds">
-        <span class="govuk-caption-xl">Patient ({{patient.id}})</span>
-        {% if patient.name[0] %}
-            <h1 class="govuk-heading-xl">{{patient.name[0].family}}, {{patient.name[0].given | join(' ')}}</h1>
-        {% else %}
-            <h1 class="govuk-heading-xl">Unknown Name</h1>
-        {% endif %}
-      </div>
-    </div>
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-two-thirds">
-        <h2 class="govuk-heading-l">Pathways In Progress</h2>
-        {% if pathways %}
-        {% for entry in pathways.entry %}
-          {% if not entry.resource.partOf %}
-            <h3 class="govuk-heading-m"><strong class="govuk-tag govuk-tag--yellow">{{entry.resource.status | replace("-", " ")}}</strong><br/>{{entry.resource.code.text}} (<a href="/Task/{{entry.resource.id}}">{{entry.resource.id}}</a>)</h3>
-            {% if entry.resource.note %}
-              <p class="govuk-body">{{entry.resource.note[0].text}}</p>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        {% else %}
-        <p class="govuk-body"><i>No pathways are currently in progress for this patient</i></p>
-        {% endif %}
-        <h2 class="govuk-heading-l">Patient Details</h2>
-        <div class="govuk-summary-card">
-            <div class="govuk-summary-card__title-wrapper">
-              <h2 class="govuk-summary-card__title">Personal Details</h2>
-            </div>
-            <div class="govuk-summary-card__content">
-              <dl class="govuk-summary-list">
-                <div class="govuk-summary-list__row">
-                  <dt class="govuk-summary-list__key">
-                    Names
-                  </dt>
-                  <dd class="govuk-summary-list__value">
-                    {% if patient.name[0] %}
-                        {% for name in patient.name %}
-                            {% if name.use %}<b>{{name.use | title}}</b> - {% endif %}{{name.family}}, {{name.given | join(' ')}}<br/>
-                        {% endfor %}
-                    {% else %}
-                    <i>Unknown</i>
-                    {% endif %}
-                  </dd>
-                </div>
-                <div class="govuk-summary-list__row">
-                  <dt class="govuk-summary-list__key">
-                    Date of Birth
-                  </dt>
-                  <dd class="govuk-summary-list__value">
-                  {% if patient.birthDate %}
-                    {{ patient.birthDate.day }}/{{ patient.birthDate.month }}/{{ patient.birthDate.year }} (age {{ patient.birthDate | birth_date_to_age }})
-                  {% else %}
-                    <i>Unknown</i>
-                  {% endif %}
-                  </dd>
-                </div>
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                      Gender
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                    {% if patient.gender %}
-                      {{ patient.gender | title }}
-                    {% else %}
-                      <i>Unknown</i>
-                    {% endif %}
-                    </dd>
-                </div>
-                <div class="govuk-summary-list__row">
-                  <dt class="govuk-summary-list__key">
-                    NHS Number
-                  </dt>
-                  <dd class="govuk-summary-list__value">
-                  {% if patient.identifier[0] %}
-                    {% for identifier in patient.identifier %}
-                      {% if identifier.system == "https://fhir.nhs.uk/Id/nhs-number" %}
-                      {{identifier.value[0:3]}} {{identifier.value[3:6]}} {{identifier.value[6:10]}}
-                      {% endif %}
-                    {% endfor %}
-                  {% else %}
-                    <i>Unknown</i>
-                  {% endif %}
-                  </dd>
-              </div>
-                
-              </dl>
-            </div>
-          </div>
-      </div>
-      <div class="govuk-grid-column-one-third">
-      </div>
-    </div>
-    </main>
+{% block hero %}
+<span class="govuk-caption-xl">Patient ({{patient.id}})</span>
+{% if patient.name[0] %}
+    <h1 class="govuk-heading-xl">{{patient.name[0].family}}, {{patient.name[0].given | join(' ')}}</h1>
+{% else %}
+    <h1 class="govuk-heading-xl">Unknown Name</h1>
+{% endif %}
+{% endblock %}
+
+{% block main %}
+<h2 class="govuk-heading-l">Pathways In Progress</h2>
+{% if pathways %}
+{% for entry in pathways.entry %}
+  {% if not entry.resource.partOf %}
+    <h3 class="govuk-heading-m"><strong class="govuk-tag govuk-tag--yellow">{{entry.resource.status | replace("-", " ")}}</strong><br/>{{entry.resource.code.text}} (<a href="/Task/{{entry.resource.id}}">{{entry.resource.id}}</a>)</h3>
+    {% if entry.resource.note %}
+      <p class="govuk-body">{{entry.resource.note[0].text}}</p>
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% else %}
+<p class="govuk-body"><i>No pathways are currently in progress for this patient</i></p>
+{% endif %}
+<h2 class="govuk-heading-l">Patient Details</h2>
+<div class="govuk-summary-card">
+  <div class="govuk-summary-card__title-wrapper">
+    <h2 class="govuk-summary-card__title">Personal Details</h2>
   </div>
+  <div class="govuk-summary-card__content">
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Names
+        </dt>
+        <dd class="govuk-summary-list__value">
+          {% if patient.name[0] %}
+              {% for name in patient.name %}
+                  {% if name.use %}<b>{{name.use | title}}</b> - {% endif %}{{name.family}}, {{name.given | join(' ')}}<br/>
+              {% endfor %}
+          {% else %}
+          <i>Unknown</i>
+          {% endif %}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Date of Birth
+        </dt>
+        <dd class="govuk-summary-list__value">
+        {% if patient.birthDate %}
+          {{ patient.birthDate.day }}/{{ patient.birthDate.month }}/{{ patient.birthDate.year }} (age {{ patient.birthDate | birth_date_to_age }})
+        {% else %}
+          <i>Unknown</i>
+        {% endif %}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Gender
+          </dt>
+          <dd class="govuk-summary-list__value">
+          {% if patient.gender %}
+            {{ patient.gender | title }}
+          {% else %}
+            <i>Unknown</i>
+          {% endif %}
+          </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          NHS Number
+        </dt>
+        <dd class="govuk-summary-list__value">
+        {% if patient.identifier[0] %}
+          {% for identifier in patient.identifier %}
+            {% if identifier.system == "https://fhir.nhs.uk/Id/nhs-number" %}
+            {{identifier.value[0:3]}} {{identifier.value[3:6]}} {{identifier.value[6:10]}}
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <i>Unknown</i>
+        {% endif %}
+        </dd>
+    </div>
+      
+    </dl>
+  </div>
+</div>
+{% endblock %}
+
+{% block side %}
+<h4 class="govuk-heading-m">Admin Tools</h4>
+<a class="govuk-button govuk-button--secondary" href="/edit/Patient/{{patient.id}}">Edit</a>
 {% endblock %}

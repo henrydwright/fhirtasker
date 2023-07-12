@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block hero %}
+<span class="govuk-caption-xl">{%if not resource_json %}<strong class="govuk-tag">New Resource</strong><br/>{%endif%}<a href="/{{relative_path}}">{{relative_path}}</a></span>
+<h1 class="govuk-heading-xl">Resource Editor</h1>
+{% endblock %}
+
+{% block main_row %}
+<div class="govuk-grid-column-full">
+    <style type="text/css" media="screen">
+        #editor { 
+            position: block;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 600px;
+            width: auto;
+            border: 2px solid black;
+        }
+    </style>
+    <div class="moj-button-menu">
+        <div class="moj-button-menu__wrapper">
+            <button id="editor-menu-save" draggable="false" class="govuk-button moj-button-menu__item govuk-button" data-module="govuk-button">
+            Save
+            </button>
+        </div>
+    </div>
+    <div id="editor">{%if resource_json%}{{resource_json}}{%endif%}</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        var editor = ace.edit("editor");
+        //editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/json"); 
+
+        const save_button = document.getElementById("editor-menu-save");
+        save_button.onclick = function () {
+            fetch("/save/{{relative_path}}", {
+                method: "POST",
+                body: JSON.stringify({
+                    resource: editor.getValue()
+                }),
+                headers: {
+                    "Content-Type": "application/json; charset=UTF-8"
+                }
+            })
+            .then((response) => response.json())
+            .then((json) => {
+                console.log(json);
+                location.reload();
+            });
+        }
+
+        </script>
+</div>
+{% endblock %}

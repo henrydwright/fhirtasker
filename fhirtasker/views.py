@@ -4,6 +4,8 @@ from fhirtasker.integrations.auth.user.client import UserAuthClient
 from fhirtasker.integrations.fhir.client import get_fhir_client, FHIRClientOperationError
 from fhirtasker.integrations.fhir.resources import ActivePatient
 
+import json
+
 from fhir.resources.R4B.bundle import Bundle
 from fhir.resources.R4B.observation import Observation
 from fhir.resources.R4B.patient import Patient
@@ -84,7 +86,6 @@ def patient(unsafe_nhs_number):
         if ex.status_code == 404:
             return render_template("errors/404.html", error_text=f"The patient with NHS Number {nhs_number} could not be found.")
         
-
 @app.route("/Task/<unsafe_task_id>")
 def task(unsafe_task_id):
     task_id = str(escape(unsafe_task_id))
@@ -109,3 +110,46 @@ def task(unsafe_task_id):
         if ex.status_code == 404:
             return render_template("errors/404.html", error_text=f"The task with ID {task_id} could not be found.")
     
+# this is all horrible, and temporary to avoid needing to
+#  use postman all the time...
+PERMITTED_RESOURCE_TYPES = [
+    "Patient",
+    "Task",
+    "Practitioner",
+    "PractitionerRole",
+    "Observation"
+]
+
+@app.route("/edit/<unsafe_resource_type>/<unsafe_resource_id>")
+def resource_editor(unsafe_resource_type, unsafe_resource_id):
+    resource_type = escape(unsafe_resource_type)
+    if resource_type not in PERMITTED_RESOURCE_TYPES:
+        return render_template("errors/404.html", error_text=f"The resource type \"{resource_type}\" is either not a valid FHIR resource type, or is not supported by fhirtasker.")
+    
+    resource_id = escape(unsafe_resource_id)
+    relative_path = f"{resource_type}/{resource_id}"
+    response_content = FHIR_CLIENT.get_resource_content(relative_path)
+    resource_json = None
+
+    if response_content:
+        resource_json = json.dumps(json.loads(FHIR_CLIENT.get_resource_content(relative_path)), indent=2)
+
+    return render_template("admin/resource_editor.html", user=get_user(), relative_path=relative_path, resource_json=resource_json)
+
+@app.route("/save/<unsafe_resource_type>/<unsafe_resource_id>", methods=['POST'])
+def resource_saver(unsafe_resource_type, unsafe_resource_id):
+    resource_type = escape(unsafe_resource_type)
+    if resource_type not in PERMITTED_RESOURCE_TYPES:
+        return render_template("errors/404.html", error_text=f"The resource type \"{resource_type}\" is either not a valid FHIR resource type, or is not supported by fhirtasker.")
+    
+    resource_id = escape(unsafe_resource_id)
+    relative_path = f"{resource_type}/{resource_id}"
+
+    resource = json.loads(request.get_json()["resource"])
+    print(resource)
+    response = FHIR_CLIENT.put_resource(relative_path, resource)
+    print(str(response))
+    return json.dumps({
+        "statusCode": response.status_code,
+        "body": response.json()
+        })

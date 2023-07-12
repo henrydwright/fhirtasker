@@ -84,7 +84,7 @@
 {% endif %}
 
 {% if subtasks %}
-<code hidden>
+<code>
   <b>Task</b>
   {{task.json()}}
   <br/>
@@ -142,4 +142,7 @@
   {% if task.for_fhir %}<li>Patient on pathway: <a class="govuk-link" href="/{{task.for_fhir.reference}}">{{task.for_fhir.display}}</a></li>{% endif %}
   {% if task.partOf[0] %}<li>Part of pathway: <a class="govuk-link" href="/{{task.partOf[0].reference}}">{{task.partOf[0].reference}}</a></li>{%endif%}
 </ul>
+
+<h4 class="govuk-heading-m">Admin Tools</h4>
+<a class="govuk-button govuk-button--secondary" href="/edit/Task/{{task.id}}">Edit</a>
 {% endblock %}

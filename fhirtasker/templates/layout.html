@@ -16,6 +16,7 @@ FHIRTasker
         </div>
       </div>
       <div class="govuk-grid-row">
+        {% block main_row %}
         <div class="govuk-grid-column-two-thirds">
             {% block main %}
 
@@ -26,6 +27,7 @@ FHIRTasker
 
             {% endblock %}
         </div>
+        {% endblock %}
       </div>
     </main>
   </div>
